@@ -16,6 +16,7 @@ public class LojadebicicletasV20 {
      */
     public static void main(String[] args) {
         System.out.println("eu sou um meme");
+        System.out.println("eu sou outro meme");
     }
     
 }
