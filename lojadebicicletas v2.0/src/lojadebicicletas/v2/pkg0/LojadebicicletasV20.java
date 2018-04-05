@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package lojadebicicletas.v2.pkg0;
 
 import java.io.FileInputStream;
@@ -14,13 +9,9 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-/**
- *
- * @author Miguel Brandão
- */
 public class LojadebicicletasV20 {
     
-    public static void main(String[] args) throws ClassNotFoundException, FileNotFoundException, IOException{
+    public static void main(String[] args) throws ClassNotFoundException{
         ArrayList<Produto> produtos = new ArrayList<>();
         ArrayList<String> categorias = new ArrayList<>();
         try{
@@ -30,7 +21,7 @@ public class LojadebicicletasV20 {
             System.out.println("file not found");
             System.out.println(e.getMessage());
         } catch(IOException e){
-            System.out.println("something went wrong with produtos please contact gui he did this part"); //TODO
+            System.out.println("something went wrong with produtos please contact gui it's his fault"); //TODO
             System.out.println(e.getMessage());
             System.exit(0);
         }
@@ -41,16 +32,16 @@ public class LojadebicicletasV20 {
             System.out.println("file not found");
             System.out.println(e.getMessage());
         } catch(IOException e){
-            System.out.println("something went wrong with categorias please contact gui he did this part"); //TODO
+            System.out.println("something went wrong with categorias please contact gui it's his fault"); //TODO
             System.out.println(e.getMessage());
             System.exit(0);
         }
         
         System.out.println("All loaded");
         
-        System.out.println("1- registar produto, 2-exit");
         Scanner sc = new Scanner(System.in);
         while(true){
+            System.out.println("1- registar produto, 2-exit");
             int i = sc.nextInt();
             int counter = 1;
             if (i == 1){
@@ -83,15 +74,25 @@ public class LojadebicicletasV20 {
         
         //produtos.add(new Produto("x91topbiek", APIExtension.categoria.Bicicletas.name(), 10)); //must test if not repeated
         //System.out.println(produtos.get(0).nome);
-        if(!produtos.isEmpty()){
-            ObjectOutputStream oosprod = new ObjectOutputStream(new FileOutputStream("produtos.txt"));
-            oosprod.writeObject(produtos);
-            System.out.println("produtos not null saving");
+        try{
+            if(!produtos.isEmpty()){
+                ObjectOutputStream oosprod = new ObjectOutputStream(new FileOutputStream("produtos.txt"));
+                oosprod.writeObject(produtos);
+                System.out.println("produtos not null saving");
+            }
+        } catch (IOException e){
+            System.out.println("something went wrong saving contact gui again");
+            System.out.println(e.getMessage());
         }
-        if(!categorias.isEmpty()){
-            ObjectOutputStream ooscatg = new ObjectOutputStream(new FileOutputStream("categorias.txt"));
-            ooscatg.writeObject(categorias);
-            System.out.println("categorias not null saving");
+        try{
+            if(!categorias.isEmpty()){
+                ObjectOutputStream ooscatg = new ObjectOutputStream(new FileOutputStream("categorias.txt"));
+                ooscatg.writeObject(categorias);
+                System.out.println("categorias not null saving");
+            }
+        } catch (IOException e){
+            System.out.println("something went wrong saving contact gui again");
+            System.out.println(e.getMessage());
         }
     }
 }
