@@ -48,25 +48,29 @@ public class LojadebicicletasV20 {
         
         System.out.println("All loaded");
         
-        System.out.println("1- registar produto");
+        System.out.println("1- registar produto, 2-exit");
         Scanner sc = new Scanner(System.in);
         while(true){
             int i = sc.nextInt();
             int counter = 1;
             if (i == 1){
-                System.out.println("Insira o nome");
+                System.out.println("    " + "Insira o nome");
                 String nome = sc.next();
-                System.out.println("insira a caregoria");
+                System.out.println("    " + "insira a categoria");
                 if(categorias != null)
                     for(counter=1;counter<categorias.size()+1;counter++)
-                        System.out.println(counter + "- " +categorias.get(counter-1));
-                System.out.println((counter) + "- Nova Categoria");
+                        System.out.println("    " + counter + "- " +categorias.get(counter-1));
+                System.out.println("    " + (counter) + "- Nova Categoria");
                 int choice = sc.nextInt();
                 if(choice == categorias.size()+1){
-                    System.out.println("Nome da nova categoria");
-                    categorias.add(sc.next());
-                    System.out.println(categorias.get(0));
+                    System.out.println("    " + "    " + "Nome da nova categoria");
                 }
+                categorias.add(sc.next());
+                System.out.println(categorias.get(0));
+                System.out.println("    " + "stock inicial?");
+                int stock = sc.nextInt();
+                produtos.add(new Produto(nome, categorias.get(choice-1),  stock));
+                System.out.println("Produto adicionado com sucesso");
             }
             if (i == 2){
                 break;
