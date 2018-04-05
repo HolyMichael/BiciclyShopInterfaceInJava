@@ -13,7 +13,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Scanner;
-import lojadebicicletas.v2.pkg0.APIExtension;
 
 /**
  *
@@ -59,9 +58,9 @@ public class LojadebicicletasV20 {
                 String nome = sc.next();
                 System.out.println("insira a caregoria");
                 if(categorias != null)
-                    for(counter=1;i<categorias.size()+1;i++)
-                        System.out.println(i + "- " +categorias.get(i-1));
-                System.out.println((i) + "- Nova Categoria");
+                    for(counter=1;counter<categorias.size()+1;counter++)
+                        System.out.println(counter + "- " +categorias.get(counter-1));
+                System.out.println((counter) + "- Nova Categoria");
                 int choice = sc.nextInt();
                 if(choice == categorias.size()+1){
                     System.out.println("Nome da nova categoria");
