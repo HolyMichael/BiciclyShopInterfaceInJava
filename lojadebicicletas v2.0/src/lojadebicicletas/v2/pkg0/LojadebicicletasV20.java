@@ -42,24 +42,24 @@ public class LojadebicicletasV20 {
         Scanner sc = new Scanner(System.in);
         while(true){
             System.out.println("1- registar produto, 2-exit");
-            int i = sc.nextInt();
+            int i = Ler.umInt();
             int counter = 1;
             if (i == 1){
                 System.out.println("    " + "Insira o nome");
-                String nome = sc.next();
+                String nome = Ler.umaString();
                 System.out.println("    " + "insira a categoria");
                 if(categorias != null)
                     for(counter=1;counter<categorias.size()+1;counter++)
                         System.out.println("    " + counter + "- " +categorias.get(counter-1));
                 System.out.println("    " + (counter) + "- Nova Categoria");
-                int choice = sc.nextInt();
+                int choice = Ler.umInt();
                 if(choice == categorias.size()+1){
                     System.out.println("    " + "    " + "Nome da nova categoria");
+                    categorias.add(Ler.umaString());
                 }
-                categorias.add(sc.next());
                 System.out.println(categorias.get(0));
                 System.out.println("    " + "stock inicial?");
-                int stock = sc.nextInt();
+                int stock = Ler.umInt();
                 produtos.add(new Produto(nome, categorias.get(choice-1),  stock));
                 System.out.println("Produto adicionado com sucesso");
             }
