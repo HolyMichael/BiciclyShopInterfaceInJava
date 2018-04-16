@@ -5,7 +5,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
 public class RMIImpl extends UnicastRemoteObject implements RMIInterface{
-     int count;
+    int count;
     public RMIImpl(String name) throws RemoteException {
         super();
         try {
