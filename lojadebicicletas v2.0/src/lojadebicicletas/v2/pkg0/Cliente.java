@@ -7,16 +7,30 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.Socket;
 import java.rmi.*;
 import java.rmi.registry.*;
 import java.rmi.server.*;
+import static java.rmi.server.RemoteServer.getClientHost;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Cliente {
+public class Cliente{
+    /*String nome;
+    String categoria;
+    String IP;
+    
+    Cliente(String n,String c, String ip){
+        this.nome = n;
+        this.categoria = c;
+        this.IP = ip;
+    }*/
+    
+    static RMIInterface serverObject;
+    
     public static void main(String[] argv) {
         String serverName = "";
         System.setSecurityManager(new SecurityManager());
@@ -37,9 +51,9 @@ public class Cliente {
         }
         try {
             //bind server object to object in client
-            RMIInterface myServerObject = (RMIInterface) Naming.lookup("//"+serverName+"/RMIImpl");
+            serverObject = (RMIInterface) Naming.lookup("//"+serverName+"/RMIImpl");
             //invoke method on server object
-            //Date d = myServerObject.getDate();
+            //Date d = serverObject.getDate();
             System.out.println("RMI connection successful");
             ClientLoop();
         }
@@ -49,7 +63,7 @@ public class Cliente {
         }
     }
 
-    private static void ClientLoop() {
+    private static void ClientLoop(){
         ArrayList<Produto> produtos = new ArrayList<>();
         ArrayList<String> categorias = new ArrayList<>();
         File temp = new File("../../SavedFiles");
@@ -83,6 +97,15 @@ public class Cliente {
         
         System.out.println("All loaded");
         int i;
+        try {
+            String ip= "192.168.1.1:5252";
+            if(serverObject.registerClient(ip))
+                System.out.println("registered with " + ip);
+            else
+                System.out.println("Logged in with " + ip);;
+        } catch (RemoteException ex) {
+            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
         do{
             System.out.println("1- registar produto, 4-exit");
             i = Ler.umInt();
