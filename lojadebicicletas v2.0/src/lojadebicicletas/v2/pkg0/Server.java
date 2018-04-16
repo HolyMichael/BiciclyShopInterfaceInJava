@@ -1,8 +1,6 @@
 package lojadebicicletas.v2.pkg0;
 
 public class Server{
-    int count;
-    
     public static void main(String[] argv) {
     System.setSecurityManager(new SecurityManager());
     try { //Iniciar a execução do registry no porto desejado

@@ -19,7 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Cliente{
-    String nome;
+    /*String nome;
     String categoria;
     String IP;
     
@@ -27,7 +27,9 @@ public class Cliente{
         this.nome = n;
         this.categoria = c;
         this.IP = ip;
-    }
+    }*/
+    
+    static RMIInterface serverObject;
     
     public static void main(String[] argv) {
         String serverName = "";
@@ -49,9 +51,9 @@ public class Cliente{
         }
         try {
             //bind server object to object in client
-            RMIInterface myServerObject = (RMIInterface) Naming.lookup("//"+serverName+"/RMIImpl");
+            serverObject = (RMIInterface) Naming.lookup("//"+serverName+"/RMIImpl");
             //invoke method on server object
-            //Date d = myServerObject.getDate();
+            //Date d = serverObject.getDate();
             System.out.println("RMI connection successful");
             ClientLoop();
         }
@@ -95,13 +97,13 @@ public class Cliente{
         
         System.out.println("All loaded");
         int i;
-        String name = Ler.umaString();
-        String cat = Ler.umaString();
-        Cliente c;
         try {
-            c = new Cliente(name, cat, getClientHost());
-            System.out.println(c);
-        } catch (ServerNotActiveException ex) {
+            String ip= "192.168.1.1:5252";
+            if(serverObject.registerClient(ip))
+                System.out.println("registered with " + ip);
+            else
+                System.out.println("Logged in with " + ip);;
+        } catch (RemoteException ex) {
             Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
         }
         do{
