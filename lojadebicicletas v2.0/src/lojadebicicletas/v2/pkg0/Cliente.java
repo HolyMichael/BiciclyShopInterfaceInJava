@@ -28,8 +28,10 @@ public class Cliente{
         this.categoria = c;
         this.IP = ip;
     }*/
+    static String ip;
     
     static RMIInterface serverObject;
+    static ArrayList<String> list = new ArrayList<>();
     
     public static void main(String[] argv) {
         String serverName = "";
@@ -62,7 +64,7 @@ public class Cliente{
             System.exit(0);
         }
     }
-
+    
     private static void ClientLoop(){
         ArrayList<Produto> produtos = new ArrayList<>();
         ArrayList<String> categorias = new ArrayList<>();
@@ -98,7 +100,7 @@ public class Cliente{
         System.out.println("All loaded");
         int i;
         try {
-            String ip= "192.168.1.1:5252";
+            ip= "42";
             if(serverObject.registerClient(ip))
                 System.out.println("registered with " + ip);
             else
@@ -107,7 +109,7 @@ public class Cliente{
             Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
         }
         do{
-            System.out.println("1- registar produto, 4-exit");
+            System.out.println("1- registar produto, 2-comprar produto, 4-exit");
             i = Ler.umInt();
             int counter = 1;
             switch(i){
@@ -128,8 +130,36 @@ public class Cliente{
                     int stock = Ler.umInt();
                     produtos.add(new Produto(nome, categorias.get(choice-1),  stock));
                     System.out.println("Produto adicionado com sucesso");
+            {
+                try {
+                    if(serverObject.registerCategory(ip , categorias.get(choice-1)))
+                        System.out.println("Nice");
+                    else
+                        System.out.println("Não nice");
+                } catch (RemoteException ex) {
+                    Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
                     break;
                 case 2:
+                    System.out.println("    " + "Escolha a categoria");
+                    if(categorias != null)
+                        for(counter=1;counter<categorias.size()+1;counter++)
+                            System.out.println("    " + counter + "- " +categorias.get(counter-1));
+                    System.out.println("    " + (counter) + "- Nova Categoria");
+                    choice = Ler.umInt();
+                    if(choice == categorias.size()+1){
+                        System.out.println("    " + "    " + "Nome da nova categoria");
+                        categorias.add(Ler.umaString());
+                    }
+                    if(!list.isEmpty()){
+                        counter = 0;
+                        for(i=0;i<list.size();i++){
+                            counter++;
+                            System.out.println(counter + " " + list.get(i));
+                        }
+                        choice = Ler.umInt();    
+                    }
                     break;
                 case 3:
                     break;

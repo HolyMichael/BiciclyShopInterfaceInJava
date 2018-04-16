@@ -68,7 +68,8 @@ public class RMIImpl extends UnicastRemoteObject implements RMIInterface{
         for(ClientObj c : clients){
             if(ip.equals(c.getIp()))
                 if(!c.getCategory().contains(category)){
-                    c.insertCategory(category);
+                    c.insertCategory(category); 
+                    System.out.println(ip + " " + category);
                     return true;
                 }else
                     return false;
