@@ -6,7 +6,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 
-public class RMIImpl extends UnicastRemoteObject implements RMIInterface{
+public class RMIImpl extends UnicastRemoteObject implements RMIServerInterface{
     int count;
     private class ClientObj implements Serializable{
         String ip;

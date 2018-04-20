@@ -30,7 +30,7 @@ public class Cliente{
     }*/
     static String ip;
     
-    static RMIInterface serverObject;
+    static RMIServerInterface serverObject;
     static ArrayList<String> list = new ArrayList<>();
     
     public static void main(String[] argv) {
@@ -53,7 +53,7 @@ public class Cliente{
         }
         try {
             //bind server object to object in client
-            serverObject = (RMIInterface) Naming.lookup("//"+serverName+"/RMIImpl");
+            serverObject = (RMIServerInterface) Naming.lookup("//"+serverName+"/RMIImpl");
             //invoke method on server object
             //Date d = serverObject.getDate();
             System.out.println("RMI connection successful");
@@ -74,7 +74,7 @@ public class Cliente{
             System.out.println("created Saved Files");
         }
         try{
-            ObjectInputStream oisprod = new ObjectInputStream(new FileInputStream("SavedFiles/produtos.txt"));
+            ObjectInputStream oisprod = new ObjectInputStream(new FileInputStream("../../SavedFiles/produtos.txt"));
             produtos = (ArrayList<Produto>) oisprod.readObject();
         } catch(FileNotFoundException e){
             System.out.println(e.getMessage());
@@ -85,7 +85,7 @@ public class Cliente{
             System.out.println(e.getMessage());
         }
         try{
-            ObjectInputStream oiscatg = new ObjectInputStream(new FileInputStream("SavesFiled/categorias.txt"));
+            ObjectInputStream oiscatg = new ObjectInputStream(new FileInputStream("../../SavedFiles/categorias.txt"));
             categorias = (ArrayList<String>) oiscatg.readObject();
         } catch(FileNotFoundException e){
             System.out.println(e.getMessage());
@@ -174,6 +174,7 @@ public class Cliente{
             if(!produtos.isEmpty()){
                 ObjectOutputStream oosprod = new ObjectOutputStream(new FileOutputStream("../../SavedFiles/produtos.txt"));
                 oosprod.writeObject(produtos);
+                oosprod.flush();
                 System.out.println("produtos not null saving");
             }
         } catch (IOException e){
@@ -183,6 +184,7 @@ public class Cliente{
             if(!categorias.isEmpty()){
                 ObjectOutputStream ooscatg = new ObjectOutputStream(new FileOutputStream("../../SavedFiles/categorias.txt"));
                 ooscatg.writeObject(categorias);
+                ooscatg.flush();
                 System.out.println("categorias not null saving");
             }
         } catch (IOException e){
