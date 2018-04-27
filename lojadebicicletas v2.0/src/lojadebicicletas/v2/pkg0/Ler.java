@@ -15,42 +15,43 @@ public class Ler{
         }
         return s;
     }
+    
     public static int umInt(){
-    while(true){
-        try{
-            return Integer.valueOf(umaString().trim()).intValue();
+        while(true){
+            try{
+                return Integer.valueOf(umaString().trim()).intValue();
+            }
+            catch(Exception e){
+                System.out.println("Opção não válida.");
+                System.out.print("");
+            }
         }
-        catch(Exception e){
-        System.out.println("Opção não válida.");
-        System.out.print("");
-        }
-       }
     }
     
     public static double umDouble(){
         while(true){
-        try{
-            return Double.valueOf(umaString().trim()).doubleValue();
-        }
-        catch(Exception e){
-        System.out.println("Opção não válida.");
-        System.out.print("");
-        }
-    }
-    }
-    public static double umDoubleNIF(){
-    while(true){
-        try{
-            double a = Double.parseDouble(umaString().trim());
-            if (a>99999999 && a<=999999999){
-              return a;  
+            try{
+                return Double.valueOf(umaString().trim()).doubleValue();
             }
-            else
-                System.out.println("Número inválido:");
+            catch(Exception e){
+                System.out.println("Opção não válida.");
+                System.out.print("");
+            }
         }
-        catch(Exception e){
-        System.out.println("Opção não válida.");
+    }
+    
+    public static double umDoubleNIF(){
+        while(true){
+            try{
+                double a = Double.parseDouble(umaString().trim());
+                if (a>99999999 && a<=999999999)
+                  return a;  
+                else
+                    System.out.println("Número inválido:");
+            }
+            catch(Exception e){
+                System.out.println("Opção não válida.");
+            }
         }
-       }
     }
 }
