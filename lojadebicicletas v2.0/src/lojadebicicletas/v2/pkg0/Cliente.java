@@ -76,6 +76,9 @@ public class Cliente{
             System.out.println("Seu portji:");
             port = Ler.umInt();
             System.out.println("Machine IP identified.");
+            //correr a thread
+            ThreadServer comunic = new ThreadServer(port);
+            comunic.start();
             ClientLoop();
         }
         catch(Exception e) {
@@ -132,7 +135,7 @@ public class Cliente{
             System.out.println("xd");
         }
         do{
-            System.out.println("1 - Registar produto, 2 - Comprar produto, 3 - Produtos à venda, 4 - Comunicar com outro cara, 5 - exit");
+            System.out.println("1 - Registar produto, 2 - Comprar produto, 3 - Seus Produtos à venda, 4 - Comunicar com outro Cliente, 5 - exit");
             i = Ler.umInt();
             int counter = 1;
             switch(i){
@@ -153,9 +156,6 @@ public class Cliente{
                     }
                     System.out.println("    " + "stock inicial?");
                     int stock = Ler.umInt();
-                    
-                    
-                    
                     produtos.add(new Produto(nome, categorias.get(choice-1), stock, ip)); //Adição do Produto
                     System.out.println("Produto adicionado com sucesso");
                     try {
@@ -192,69 +192,41 @@ public class Cliente{
                         System.out.println((j+1) + " - " + categorias.get(j));
                     break;
                 case 4:
-                    /*
-                    String opc;
                     String Lere;
-                    do{
-                        System.out.println("Espera comunicação de alguém? [Y/N]");
-                        opc = Ler.umaString();
-                    }while(!opc.equals("Y") && !opc.equals("N"));
-                    if(opc.equals("Y")){
-                        System.out.println("Introduza as credeencias do outro cara.");
-                        String ipamigo = Ler.umaString();
-                        int portamigo = Ler.umInt();
-                        try {
-                            serversocketa = new ServerSocket(portamigo);
-                            Server = serversocketa.accept();
-                        }
-                        catch (IOException e){
-                            System.out.println(e.getMessage());
-                        }
-                        try {
-                            ObjectInputStream iss = new ObjectInputStream(Server.getInputStream());
-                            ObjectOutputStream oss = new ObjectOutputStream (Server.getOutputStream());
-                            System.out.println("!exit para sair.");
-                            while(true){
-                                System.out.println("Escrever para o Cliente " + ipamigo + " :");
-                                Lere = Ler.umaString();
-                                if (Lere.equals("!exit"))
-                                    break;
-                                oss.writeObject(Lere);
-                                System.out.println("Mensagem do Cliente " + ipamigo + " :");
-                                System.out.println((String) iss.readObject());
-                            }
-                        } catch (IOException ex) {
-                            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
-                        } catch (ClassNotFoundException ex) {
-                            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
-                        }  
+                    int auxport;
+                    Socket Cliente = null;
+                    System.out.println("Introduza um port:");
+                    auxport = Ler.umInt();
+                    try { 
+                        Cliente = new Socket ("127.0.0.1", auxport);
                     }
-                    else{
-                        try { 
-                            Cliente = new Socket ("127.0.0.1", port);
-                        }
-                        catch (IOException e){
-                            System.out.println("O Cliente para o qual ligou neste momento não se encontra disponível. Por favor, tente mais tarde.");
-                        }
-                        try {
-                            ObjectOutputStream oss = new ObjectOutputStream (Server.getOutputStream());
-                            ObjectInputStream iss = new ObjectInputStream(Server.getInputStream());
-                            System.out.println("!exit para sair.");
-                            while(true){
-                                System.out.println("Mensagem do outro cara:");
-                                System.out.println((String) iss.readObject());
-                                System.out.println("Escrever para o outro cara:");
-                                Lere = Ler.umaString();
-                                if (Lere.equals("!exit"))
-                                    break;
-                                oss.writeObject(Lere);
+                    catch (IOException e){
+                        System.out.println("O Cliente para o qual ligou neste momento não se encontra disponível. Por favor, tente mais tarde.");
+                    }
+                    try {
+                        ObjectOutputStream oss = new ObjectOutputStream (Cliente.getOutputStream());
+                        ObjectInputStream iss = new ObjectInputStream(Cliente.getInputStream());
+                        oss.writeObject(ip); //Envia ip para o outro cliente
+                        System.out.println("Em contacto com " + (String) iss.readObject() + ". !exit para sair."); // Recebe ip de quem contacta
+                        while(true){
+                            System.out.println("Mensagem para o outro Cliente:");
+                            Lere = Ler.umaString();
+                            oss.writeObject(Lere);
+                            if (Lere.equals("!exit"))
+                                break;
+                            System.out.println("Mensagem do outro Cliente:");
+                            Lere = (String) iss.readObject();
+                            if(Lere.equals("!exit")){
+                                System.out.println("Linha Fechada do outro lado");
+                                break;
                             }
-                        } catch (IOException ex) {
-                            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
-                        } catch (ClassNotFoundException ex) {
-                            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+                            System.out.println(Lere);
                         }
-                    }*/
+                    } catch (IOException ex) {
+                        System.out.println(ex.getMessage());
+                    } catch (ClassNotFoundException ex) {
+                        System.out.println(ex.getMessage());
+                    }
                 break;
             }
         }while (i!=5);
