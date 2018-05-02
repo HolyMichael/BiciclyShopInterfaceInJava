@@ -4,18 +4,16 @@ import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 
-public class ClientObj implements Serializable{
+public class waitingClientObj implements Serializable{
     String ip;
     ArrayList<String> categorias;
-    RMIClientInterface cli;
     
-    ClientObj(String ip, RMIClientInterface cli){
+    waitingClientObj(String ip){
         this.ip = ip;
         categorias = new ArrayList<>();
-        this.cli=cli;
     }
 
-    ClientObj(String ip, String categoria){
+    waitingClientObj(String ip, String categoria){
         this.ip = ip;
         categorias = new ArrayList<>();
         categorias.add(categoria);
@@ -35,6 +33,6 @@ public class ClientObj implements Serializable{
 
     @Override
     public String toString() {
-        return "ClientObj{" + "ip=" + ip + ", categorias=" + categorias + '}';
+        return "waitingClientObj{" + "ip=" + ip + ", categorias=" + categorias + '}';
     }
 }

@@ -27,12 +27,5 @@ public class Server{
         catch (Exception e) {
             System.out.println("Erro no servidor " + e);
         }
-        while(true){
-            System.out.println("Press 1 to exit.");
-            int close = Ler.umInt();
-            if(close==1)
-                //perrrrrrrrrrrguntar
-                ;
-        }
     }
 }
