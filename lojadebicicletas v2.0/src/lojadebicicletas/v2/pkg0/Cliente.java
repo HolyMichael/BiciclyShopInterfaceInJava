@@ -20,16 +20,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.net.*;
 
-public class Cliente{
-    /*String nome;
-    String categoria;
-    String IP;
+public class Cliente extends java.rmi.server.UnicastRemoteObject implements RMIClientInterface{
     
-    Cliente(String n,String c, String ip){
-        this.nome = n;
-        this.categoria = c;
-        this.IP = ip;
-    }*/
+    static RMIClientInterface CliInterface;
     static String ip = "";
     static int port;
     static InetAddress host; // IP do Cliente
@@ -41,6 +34,9 @@ public class Cliente{
     //static ServerSocket serversocketa = null;
     //static Socket Cliente = new Socket (), Server = new Socket ();
     
+    public Cliente() throws RemoteException {
+        super();
+    }
     
     public static void main(String[] argv) {
         String serverName = "";
@@ -63,7 +59,7 @@ public class Cliente{
         System.out.println("Server IP:");
         serverIP = Ler.umaString();
         System.out.println("Server Port:");
-        serverPort = Ler.umInt();
+        serverPort = Ler.umPort();
         try {
             //bind server object to object in client
             serverObject = (RMIServerInterface) Naming.lookup("//"+serverName+"/RMIImpl");
@@ -78,7 +74,7 @@ public class Cliente{
                 ip+=(ipaux[n] & 0xff);
             }
             System.out.println("Seu Port:");
-            port = Ler.umInt();
+            port = Ler.umPort();
             System.out.println("Machine IP identified.");  
             ClientLoop();
         }
@@ -92,7 +88,7 @@ public class Cliente{
         System.out.println ("Message from server: " + s);
     }
     
-    private static void ClientLoop() throws InterruptedException{
+    private static void ClientLoop() throws InterruptedException, NotBoundException, MalformedURLException{
         ArrayList<Produto> produtos = new ArrayList<>();
         ArrayList<String> categorias = new ArrayList<>();
         File temp = new File("../../SavedFiles");
@@ -125,8 +121,10 @@ public class Cliente{
         }
         System.out.println("All loaded");
         int i = 0;
+        
         try{
-            if(serverObject.registerClient(ip,port))
+            Cliente c = new Cliente();
+            if(serverObject.registerClient(ip, port, (RMIClientInterface)c))
                 System.out.println("Registered with " + ip + ":" + port);
             else
                 System.out.println("Logged in with " + ip + ":" + port);
@@ -163,7 +161,7 @@ public class Cliente{
                         produtos.add(new Produto(nome, categorias.get(choice-1), stock, ip)); //Adição do Produto
                         System.out.println("Produto adicionado com sucesso");
                         try {
-                            if(serverObject.registerCategory(ip , categorias.get(choice-1)))
+                            if(serverObject.registerCategory((ip +":"+port), categorias.get(choice-1)))
                                 System.out.println("Nice");
                             else
                                 System.out.println("Não nice");
@@ -258,6 +256,7 @@ public class Cliente{
         } catch (IOException e){
             System.out.println(e.getMessage());
         }
+        System.exit(0);
     }
 }
 

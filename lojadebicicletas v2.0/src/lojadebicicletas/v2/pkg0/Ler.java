@@ -40,6 +40,19 @@ public class Ler{
         }
     }
     
+    public static int umPort(){
+        while(true){
+            try{
+                int a = Integer.valueOf(umaString().trim()).intValue();
+                if (a>=1024 && a<=65535)
+                  return a;  
+            }
+            catch(Exception e){
+                System.out.println("Opção não válida.");
+            }
+        }
+    }
+    
     public static double umDoubleNIF(){
         while(true){
             try{

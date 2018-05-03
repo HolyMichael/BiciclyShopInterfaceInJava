@@ -21,8 +21,10 @@ public class RMIImpl extends UnicastRemoteObject implements RMIServerInterface{
     ArrayList<waitingClientObj> waitingList = new ArrayList<>();
     ObjectInputStream oisClinetes, oisWaitingClienetes;
     ObjectOutputStream oosClinetes, oosWaitingClienetes;
+    private static RMIClientInterface client;
+    static ArrayList<RMIClientInterface> cpi = new ArrayList<>();
     
-    public RMIImpl(String name) throws RemoteException {
+    public RMIImpl(String name) throws RemoteException{
         super();
         File temp = new File("../../ServerSavedFiles"); //in case of first execution errorxd
         if(!temp.exists()){
@@ -35,10 +37,14 @@ public class RMIImpl extends UnicastRemoteObject implements RMIServerInterface{
             oisClinetes = new ObjectInputStream(new FileInputStream("../../ServerSavedFiles/Clinetes.txt"));
             oisWaitingClienetes = new ObjectInputStream(new FileInputStream("../../ServerSavedFiles/WaitingClients.txt"));
             System.out.println("loading Clients...");
+            clients = (ArrayList<ClientObj>)oisClinetes.readObject();
+            waitingList = (ArrayList<waitingClientObj>)oisWaitingClienetes.readObject();
         } catch (FileNotFoundException ex) {
             System.out.println(ex.getMessage());
         } catch (IOException ex) {
             System.out.println(ex.getMessage());
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(RMIImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
         try {
             Naming.rebind(name, this);
@@ -52,6 +58,12 @@ public class RMIImpl extends UnicastRemoteObject implements RMIServerInterface{
     }
     
     public boolean registerClient(String IP, int port, RMIClientInterface CliInterface){
+        try {
+            CliInterface.printOnClient("Yo mano");
+        } 
+        catch (RemoteException ex) {
+            Logger.getLogger(RMIImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
         boolean flag = true;
         System.out.println(clients.size());
         for(ClientObj c : clients){
@@ -60,7 +72,6 @@ public class RMIImpl extends UnicastRemoteObject implements RMIServerInterface{
         }
         if(flag){
             clients.add(new ClientObj(IP+":"+port, CliInterface));
-            
             saveClients();
             System.out.println("Registered " + IP + ":"+ port +".");
             return true;
@@ -71,7 +82,10 @@ public class RMIImpl extends UnicastRemoteObject implements RMIServerInterface{
     
     public boolean registerCategory(String ip, String category){
         for(ClientObj c : clients){
-            if(ip.equals(c.getIp()))
+        System.out.println(c.ip);
+        System.out.println(c.categorias);
+        System.out.println(c.cli);
+            if(ip.equals(c.getIp())){
                 if(!c.getCategory().contains(category)){
                     c.insertCategory(category); 
                     System.out.println(ip + " " + category);
@@ -79,10 +93,13 @@ public class RMIImpl extends UnicastRemoteObject implements RMIServerInterface{
                         if(d.getCategory().equals(category)){
                             //for
                             //printOnClient("Bro alguem adicionou o teu mame");
-                        }     
+                        }   
+                    saveClients();
                     return true;
-                }else
+                }
+                else
                     return false;
+            }
         }
         return false;
     }
