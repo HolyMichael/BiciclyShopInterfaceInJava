@@ -8,17 +8,13 @@ public class ClientObj implements Serializable{
     String ip;
     ArrayList<String> categorias;
     RMIClientInterface cli;
+    boolean isOnline;
     
     ClientObj(String ip, RMIClientInterface cli){
         this.ip = ip;
         categorias = new ArrayList<>();
         this.cli=cli;
-    }
-
-    ClientObj(String ip, String categoria){
-        this.ip = ip;
-        categorias = new ArrayList<>();
-        categorias.add(categoria);
+        isOnline=true;
     }
     
     public String getIp(){
@@ -31,6 +27,14 @@ public class ClientObj implements Serializable{
 
     public void insertCategory(String category) {
         categorias.add(category);
+    }
+
+    public boolean isIsOnline() {
+        return isOnline;
+    }
+
+    public void setIsOnline(boolean isOnline) {
+        this.isOnline = isOnline;
     }
 
     @Override

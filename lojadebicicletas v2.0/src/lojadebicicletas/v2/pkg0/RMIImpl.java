@@ -57,36 +57,42 @@ public class RMIImpl extends UnicastRemoteObject implements RMIServerInterface{
         }
     }
     
-    public boolean registerClient(String IP, int port, RMIClientInterface CliInterface){
-        try {
-            CliInterface.printOnClient("Yo mano");
-        } 
-        catch (RemoteException ex) {
-            Logger.getLogger(RMIImpl.class.getName()).log(Level.SEVERE, null, ex);
+    public boolean registerClient(String IP, int port, RMIClientInterface CliInterface){ 
+    //retorna true caso registe o cliente e false caso lhe dê log-in
+        boolean flagExists = true;
+        
+        for(ClientObj c : clients){ //itera por todos os utilizadores encontrando o que invocou este método
+            if(c.getIp().equals(IP+":"+port)){
+                flagExists = false; //cliente já existe
+                c.setIsOnline(true);
+                System.out.println(IP + " logged in.");
+                return false;
+            }
         }
-        boolean flag = true;
-        System.out.println(clients.size());
-        for(ClientObj c : clients){
-            if(c.getIp().equals(IP+":"+port))
-                flag = false;
-        }
-        if(flag){
+        
+        if(flagExists){
             clients.add(new ClientObj(IP+":"+port, CliInterface));
             saveClients();
             System.out.println("Registered " + IP + ":"+ port +".");
             return true;
         }
-        System.out.println(IP + " logged in.");
         return false;
     }
     
+    public boolean logoutClient(String IP,int port){
+        for(ClientObj c : clients){ //itera por todos os utilizadores encontrando o que invocou este método
+            if(c.getIp().equals(IP+":"+port)){
+                c.setIsOnline(false);
+            }
+        }
+        return true;
+    }
+    
     public boolean registerCategory(String ip, String category){
+        //retorna true caso tenha adicionado com sucesso esta categoria ao cliente que a chamou, e falso em caso de este cliente já ter esta categoria
         for(ClientObj c : clients){
-        System.out.println(c.ip);
-        System.out.println(c.categorias);
-        System.out.println(c.cli);
-            if(ip.equals(c.getIp())){
-                if(!c.getCategory().contains(category)){
+            if(ip.equals(c.getIp())){ //itera por todos os utilizadores encontrando o que invocou este método
+                if(!c.getCategory().contains(category)){ //se esta categoria ainda não existir
                     c.insertCategory(category); 
                     System.out.println(ip + " " + category);
                     for(waitingClientObj d: waitingList)

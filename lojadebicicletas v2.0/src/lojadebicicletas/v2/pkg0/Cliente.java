@@ -236,7 +236,10 @@ public class Cliente extends java.rmi.server.UnicastRemoteObject implements RMIC
         }
         //produtos.add(new Produto("x91topbiek", APIExtension.categoria.Bicicletas.name(), 10)); //must test if not repeated
         //System.out.println(produtos.get(0).nome);
-        try{
+        
+        if(serverObject.logoutClient(ip, port)) //logout from server
+            System.out.println("logged out sucessefully");
+        try{ //save all client files
             if(!produtos.isEmpty()){
                 ObjectOutputStream oosprod = new ObjectOutputStream(new FileOutputStream("../../SavedFiles/produtos.txt"));
                 oosprod.writeObject(produtos);
