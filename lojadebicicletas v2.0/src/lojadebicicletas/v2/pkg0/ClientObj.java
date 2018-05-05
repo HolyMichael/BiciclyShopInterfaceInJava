@@ -29,6 +29,14 @@ public class ClientObj implements Serializable{
         categorias.add(category);
     }
 
+    public RMIClientInterface getCli() {
+        return cli;
+    }
+
+    public void setCli(RMIClientInterface cli) {
+        this.cli = cli;
+    }
+    
     public boolean isIsOnline() {
         return isOnline;
     }

@@ -137,7 +137,7 @@ public class Cliente extends java.rmi.server.UnicastRemoteObject implements RMIC
         comunic.start();
         synchronized (comunic){
             do{
-                System.out.println("1 - Registar produto, 2 - Comprar produto, 3 - Seus Produtos à venda, 4 - Comunicar com outro Cliente, 5 - exit");
+                System.out.println("1 - Registar produto, 2 - Comprar produto, 3 - Seus Produtos à venda, 4 - Lista de categorias à venda, 5 - Retirar categoria do seu Perfil, 6 - Cancelar registo no Servidor, 7 - Comunicar com outro Cliente, 8 - exit");
                 i = Ler.umInt();
                 int counter = 1;
                 switch(i){
@@ -175,12 +175,17 @@ public class Cliente extends java.rmi.server.UnicastRemoteObject implements RMIC
                         String op = Ler.umaString();
                         try {
                             ArrayList <String> cat = serverObject.getClientsSellingCategory(op,ip);
-                            if(cat == null)
+                            if(cat == null){
                                 System.out.println("Categoria não encontrada foi adicionada à lista de memes");
-                            else
-                                for(int n = 0; n<cat.size();n++)
+                            }
+                            else{
+                                for(int n = 0; n<cat.size();n++){
                                     System.out.println(cat.get(n));
+                                }
+                                System.out.println("tamos cá2");
+                            }
                         } catch (RemoteException ex) {
+                            System.out.println("teste9");
                             Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
                         }
                         break;
@@ -193,7 +198,7 @@ public class Cliente extends java.rmi.server.UnicastRemoteObject implements RMIC
                         for(j=0;j<categorias.size();j++)
                             System.out.println((j+1) + " - " + categorias.get(j));
                         break;
-                    case 4:
+                    case 7:
                         String Lere;
                         int auxport;
                         Socket Cliente = null;
@@ -230,15 +235,55 @@ public class Cliente extends java.rmi.server.UnicastRemoteObject implements RMIC
                         } catch (ClassNotFoundException ex) {
                             System.out.println(ex.getMessage());
                         }
-                    break;
+                        break;
+                    case 4:
+                        try {
+                            int countings=1;
+                            ArrayList<String> Categories = new ArrayList<>();
+                            Categories = serverObject.getAllCategories();
+                            for(String s : Categories){
+                                System.out.println(countings + " - " + s);
+                                countings++;
+                            }  
+                        } 
+                        catch (RemoteException ex) {
+                            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        break;
+                    case 5:
+                        System.out.println("Escolha a categoria a retirar");
+                        String cate = Ler.umaString();
+                        try {
+                            if(serverObject.removeCategory(ip, port, cate))
+                                System.out.println("Categoria removida com sucesso");
+                            else
+                                System.out.println("Categoria não existente");
+                        } 
+                        catch (RemoteException ex) {
+                            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        break;
+                    case 6:
+                        try {
+                            if(serverObject.removeClient(ip, port)){ //logout from server
+                                System.out.println("Cliente removido com sucesso");
+                                System.exit(0);
+                            }
+                        } 
+                        catch (RemoteException ex) {
+                            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                 }
-            }while (i!=5);
+            }while (i!=8);
         }
         //produtos.add(new Produto("x91topbiek", APIExtension.categoria.Bicicletas.name(), 10)); //must test if not repeated
         //System.out.println(produtos.get(0).nome);
-        
-        if(serverObject.logoutClient(ip, port)) //logout from server
-            System.out.println("logged out sucessefully");
+        try {
+            if(serverObject.logoutClient(ip, port)) //logout from server
+                System.out.println("logged out sucessefully");
+        } catch (RemoteException ex) {
+            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
         try{ //save all client files
             if(!produtos.isEmpty()){
                 ObjectOutputStream oosprod = new ObjectOutputStream(new FileOutputStream("../../SavedFiles/produtos.txt"));
