@@ -9,11 +9,12 @@ public class Produto implements Serializable{
     String IP; //Identificação do Cliente que está a vender o certo produto
     int PORT; //Nada por agora
     
-    Produto(String nome, String categoria, int stock, String IP){
+    Produto(String nome, String categoria, int stock, String IP, int PORT){
         this.nome=nome;
         this.categoria = categoria;
         this.stock = stock;
         this.IP = IP;
+        this.PORT = PORT;
     }
 
     public void setIP(String IP) {

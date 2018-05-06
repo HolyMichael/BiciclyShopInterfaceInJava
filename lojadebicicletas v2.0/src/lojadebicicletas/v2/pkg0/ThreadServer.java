@@ -27,15 +27,17 @@ public class ThreadServer extends Thread{
     }
 
     public ArrayList<Produto> getProdutos(String ip, int port){
-        ArrayList<Produto> aux = null;
+        ArrayList<Produto> aux;
         try{
             ObjectInputStream oisprod = new ObjectInputStream(new FileInputStream("../../SavedFiles/produtos.txt"));
             aux = (ArrayList<Produto>) oisprod.readObject();
+            if(!aux.isEmpty())
+                for(int memeajuda = 0; memeajuda < aux.size(); memeajuda ++){
+                    if(aux.get(memeajuda).getIP().equals(ip)==false || aux.get(memeajuda).getPORT() != port){
+                        aux.remove(memeajuda);
+                    }
+                }
             oisprod.close();
-            for(Produto memeajuda : aux){
-                if(memeajuda.getIP().equals(ip+":"+port)==false || memeajuda.getPORT() != port)
-                    aux.remove(memeajuda);
-            }
             return aux;
         } catch(FileNotFoundException e){
             System.out.println(e.getMessage());
@@ -92,8 +94,9 @@ public class ThreadServer extends Thread{
                     System.out.println("Mensagem enviada!");
                     if (WR.equals("!exit"))
                         break;
-                    if(WR.equals("!envia"))
+                    if(WR.equals("!envia")){
                         os.writeObject(getProdutos(ip,port));
+                    }
                 }
                 System.out.println("Chamada Terminada.");
                 is.close();
