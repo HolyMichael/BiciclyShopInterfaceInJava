@@ -43,7 +43,7 @@ public class Ler{
     public static int umPort(){
         while(true){
             try{
-                int a = Integer.valueOf(umaString().trim()).intValue();
+                int a = umInt();
                 if (a>=1024 && a<=65535)
                   return a;  
             }

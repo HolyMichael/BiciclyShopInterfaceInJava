@@ -1,28 +1,52 @@
 package lojadebicicletas.v2.pkg0;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.concurrent.Semaphore;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 public class ThreadServer extends Thread{
-    String ip;
-    int port;
-    ServerSocket serversock;
-    Socket sock;
-    //String estado;
-    public ThreadServer(String ip, int port){ 
+    static String ip;
+    static int port;
+    static ServerSocket serversock;
+    static Socket sock;
+    static Thread main;
+        
+    public ThreadServer(String ip, int port, Thread main){ 
         setDaemon(true);
         this.port = port;
         this.ip = ip;
+        this.main = main;
     }
 
-    //public String getEstado() {
-    //    return estado;
-    //}
-
+    public ArrayList<Produto> getProdutos(String ip, int port){
+        ArrayList<Produto> aux = null;
+        try{
+            ObjectInputStream oisprod = new ObjectInputStream(new FileInputStream("../../SavedFiles/produtos.txt"));
+            aux = (ArrayList<Produto>) oisprod.readObject();
+            oisprod.close();
+            for(Produto memeajuda : aux){
+                if(memeajuda.getIP().equals(ip+":"+port)==false || memeajuda.getPORT() != port)
+                    aux.remove(memeajuda);
+            }
+            return aux;
+        } catch(FileNotFoundException e){
+            System.out.println(e.getMessage());
+        } catch(IOException | ClassNotFoundException e){
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
+    
     @Override
-    public void run(){
+    public synchronized void run(){
         try {
             serversock = new ServerSocket(port);
         }
@@ -31,12 +55,28 @@ public class ThreadServer extends Thread{
         }
         while(true){
             try {
-                String WR;
+                String WR, guccigang;
                 sock = serversock.accept();
+                //main.wait();
                 ObjectInputStream is = new ObjectInputStream(sock.getInputStream());
                 ObjectOutputStream os = new ObjectOutputStream(sock.getOutputStream());
-                //estado = "ativo";
-                System.out.println("Contacto de " + (String) is.readObject() + ". !exit para sair.");// Recebe ip de quem o contacta
+                guccigang = (String) is.readObject();
+                System.out.println("Pretende aceitar o contacto de " + guccigang + "? [Y/N]");
+                while(true){
+                    WR = Ler.umaString();
+                    if(WR.equals("Y") || WR.equals("N")){
+                        break;
+                    }
+                }
+                if(WR.equals("N")){
+                    os.writeObject("fim");
+                    System.out.println("Chamada desligada.");
+                    continue;
+                }
+                else{
+                   os.writeObject("heyyyy okayyyyy"); 
+                }
+                System.out.println("Contacto de " + guccigang + ". !exit para sair, !envia para enviar os seus produtos.");// Recebe ip de quem o contacta
                 os.writeObject(ip + ":" + port); //Envia ip para o outro cliente
                 while(true){
                     WR = (String) is.readObject();
@@ -49,16 +89,20 @@ public class ThreadServer extends Thread{
                     System.out.println("Mensagem para o outro Cliente:");
                     WR = Ler.umaString();
                     os.writeObject(WR);
+                    System.out.println("Mensagem enviada!");
                     if (WR.equals("!exit"))
                         break;
+                    if(WR.equals("!envia"))
+                        os.writeObject(getProdutos(ip,port));
                 }
                 System.out.println("Chamada Terminada.");
-                //estado = "desativo";
-            } catch (IOException ex) {
-                System.out.println(ex.getMessage());
-            } catch (ClassNotFoundException ex) {
+                is.close();
+                os.close();
+            }
+            catch (IOException | ClassNotFoundException ex) {
                 System.out.println(ex.getMessage());
             }
-        }
-    } 
+            //main.notify();
+        } 
+    }
 }

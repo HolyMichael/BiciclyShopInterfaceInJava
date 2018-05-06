@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.net.*;
+import static lojadebicicletas.v2.pkg0.Cliente.comunic;
 
 public class Cliente extends java.rmi.server.UnicastRemoteObject implements RMIClientInterface{
     
@@ -31,6 +32,8 @@ public class Cliente extends java.rmi.server.UnicastRemoteObject implements RMIC
     static String Nome = "catalogo";
     static String serverIP = "192.168.43.246";
     static int serverPort = 2043;
+    static ThreadServer comunic;
+    private static final Object lock = new Object ();
     //static ServerSocket serversocketa = null;
     //static Socket Cliente = new Socket (), Server = new Socket ();
     
@@ -56,13 +59,14 @@ public class Cliente extends java.rmi.server.UnicastRemoteObject implements RMIC
             System.out.println("usage: java RMIClient < host running RMI server>");
             System.exit(0);
         }
-        System.out.println("Server IP:");
-        serverIP = Ler.umaString();
-        System.out.println("Server Port:");
-        serverPort = Ler.umPort();
+        //System.out.println("Server IP:");
+        //serverIP = Ler.umaString();
+        //System.out.println("Server Port:");
+        //serverPort = Ler.umPort();
         try {
             //bind server object to object in client
-            serverObject = (RMIServerInterface) Naming.lookup("//"+serverName+"/RMIImpl");
+            //serverObject = (RMIServerInterface) Naming.lookup("//"+serverName+"/RMIImpl");
+            serverObject = (RMIServerInterface) Naming.lookup("RMIImpl"); // Por alguma razão estúpida no meu pc só funfa assim. ass.: Posé Jires
             //invoke method on server object
             //Date d = serverObject.getDate();
             System.out.println("RMI connection successful");
@@ -75,8 +79,14 @@ public class Cliente extends java.rmi.server.UnicastRemoteObject implements RMIC
             }
             System.out.println("Seu Port:");
             port = Ler.umPort();
-            System.out.println("Machine IP identified.");  
-            ClientLoop();
+            System.out.println("Machine IP identified.");
+            Thread t = Thread.currentThread();
+            System.out.println("Nome da thread:" + t.getName());
+            comunic = new ThreadServer(ip,port,t,lock);
+            synchronized(lock){
+                comunic.start();
+                ClientLoop();
+            }
         }
         catch(Exception e) {
             System.out.println("Exception occured: " + e);
@@ -88,7 +98,7 @@ public class Cliente extends java.rmi.server.UnicastRemoteObject implements RMIC
         System.out.println ("Message from server: " + s);
     }
     
-    private static void ClientLoop() throws InterruptedException, NotBoundException, MalformedURLException{
+    private static void ClientLoop() throws InterruptedException, NotBoundException, MalformedURLException, RemoteException, ClassNotFoundException{
         ArrayList<Produto> produtos = new ArrayList<>();
         ArrayList<String> categorias = new ArrayList<>();
         File temp = new File("../../SavedFiles");
@@ -121,7 +131,6 @@ public class Cliente extends java.rmi.server.UnicastRemoteObject implements RMIC
         }
         System.out.println("All loaded");
         int i = 0;
-        
         try{
             Cliente c = new Cliente();
             if(serverObject.registerClient(ip, port, (RMIClientInterface)c))
@@ -146,15 +155,32 @@ public class Cliente extends java.rmi.server.UnicastRemoteObject implements RMIC
                         String nome = Ler.umaString();
                         System.out.println("    " + "insira a categoria:");
 
-                        if(categorias != null) //Mostrar Categorias
-                            for(counter=1;counter<categorias.size()+1;counter++)
-                                System.out.println("    " + counter + "- " +categorias.get(counter-1));
-                        System.out.println("    " + (counter) + "- Nova Categoria");
-
-                        int choice = Ler.umInt();
-                        if(choice == categorias.size()+1){ //Nova Categoria
-                            System.out.println("    " + "    " + "Nome da nova categoria");
-                            categorias.add(Ler.umaString());
+                int choice = Ler.umInt();
+                if(choice == categorias.size()+1){ //Nova Categoria
+                    System.out.println("    " + "    " + "Nome da nova categoria");
+                    categorias.add(Ler.umaString());
+                }
+                System.out.println("    " + "stock inicial?");
+                int stock = Ler.umInt();
+                produtos.add(new Produto(nome, categorias.get(choice-1), stock, ip)); //Adição do Produto
+                System.out.println("Produto adicionado com sucesso");
+                try {
+                    if(serverObject.registerCategory((ip +":"+port), categorias.get(choice-1)))
+                        System.out.println("Nice");
+                    else
+                        System.out.println("Não nice");
+                } 
+                catch (RemoteException ex) {
+                    Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                break;
+                case 2:
+                    System.out.println("Escreva a sua categoria:");
+                    String op = Ler.umaString();
+                    try {
+                        ArrayList <String> cat = serverObject.getClientsSellingCategory(op,ip);
+                        if(cat == null){
+                            System.out.println("Categoria não encontrada foi adicionada à lista de memes");
                         }
                         System.out.println("    " + "stock inicial?");
                         int stock = Ler.umInt();
@@ -178,15 +204,7 @@ public class Cliente extends java.rmi.server.UnicastRemoteObject implements RMIC
                             if(cat == null){
                                 System.out.println("Categoria não encontrada foi adicionada à lista de memes");
                             }
-                            else{
-                                for(int n = 0; n<cat.size();n++){
-                                    System.out.println(cat.get(n));
-                                }
-                                System.out.println("tamos cá2");
-                            }
-                        } catch (RemoteException ex) {
-                            System.out.println("teste9");
-                            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+                            System.out.println("tamos cá2");
                         }
                         break;
                     case 6:
@@ -220,11 +238,8 @@ public class Cliente extends java.rmi.server.UnicastRemoteObject implements RMIC
                                 System.out.println("Mensagem do outro Cliente:");
                                 System.out.println(Lere);
                             }
-                            System.out.println("Chamada Terminada.");
-                        } catch (IOException ex) {
-                            System.out.println(ex.getMessage());
-                        } catch (ClassNotFoundException ex) {
-                            System.out.println(ex.getMessage());
+                            System.out.println("Mensagem do outro Cliente:");
+                            System.out.println(Lere);
                         }
                         break;
                     case 3:

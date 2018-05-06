@@ -44,7 +44,7 @@ public class ClientObj implements Serializable{
     public void setIsOnline(boolean isOnline) {
         this.isOnline = isOnline;
     }
-
+    
     @Override
     public String toString() {
         return "ClientObj{" + "ip=" + ip + ", categorias=" + categorias + '}';

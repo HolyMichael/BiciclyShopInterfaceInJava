@@ -24,6 +24,14 @@ public class Produto implements Serializable{
         this.PORT = PORT;
     }
 
+    public String getIP() {
+        return IP;
+    }
+
+    public int getPORT() {
+        return PORT;
+    }
+
     @Override
     public String toString() {
         return "Produto{" + "nome=" + nome + ", categoria=" + categoria + ", stock=" + stock + ", IP=" + IP + '}';

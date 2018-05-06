@@ -121,28 +121,28 @@ public class RMIImpl extends UnicastRemoteObject implements RMIServerInterface{
     }
     
     public boolean removeClient(String IP,int port){
-        for(ClientObj c : clients){ //itera por todos os utilizadores encontrando o que invocou este método
-            if(c.getIp().equals(IP+":"+port)){
-                clients.remove(c);
-                saveClients();
+        for(ClientObj c : clients){ //itera por todos os utilizadores encontrando o que invocou este método 
+            if(c.getIp().equals(IP+":"+port)){ 
+                clients.remove(c); 
+                saveClients(); 
                 return true;
-            }
+            } 
+        } 
+        return false; 
+    }     
+ 
+    public boolean removeCategory(String ip, int port, String category){ 
+        for(ClientObj c : clients){ //itera por todos os utilizadores encontrando o que invocou este método 
+            if(c.getIp().equals(ip+":"+port)){ 
+                for(String cat : c.categorias) 
+                    if(cat.equals(category)){ 
+                        c.categorias.remove(cat); 
+                        saveClients(); 
+                        return true; 
+                    } 
+            } 
         }
-        return false;
-    }
-    
-    public boolean removeCategory(String ip, int port, String category){
-        for(ClientObj c : clients){ //itera por todos os utilizadores encontrando o que invocou este método
-            if(c.getIp().equals(ip+":"+port)){
-                for(String cat : c.categorias)
-                    if(cat.equals(category)){
-                        c.categorias.remove(cat);
-                        saveClients();
-                        return true;
-                    }
-            }
-        }
-        return false;
+        return false; 
     }
     
     public ArrayList<String> getAllCategories(){
@@ -226,6 +226,7 @@ public class RMIImpl extends UnicastRemoteObject implements RMIServerInterface{
         }
         return sellingClients;
     }
+ 
     
     private void saveClients() {
         try {
@@ -270,4 +271,3 @@ public class RMIImpl extends UnicastRemoteObject implements RMIServerInterface{
         }
     }  
 }
-
