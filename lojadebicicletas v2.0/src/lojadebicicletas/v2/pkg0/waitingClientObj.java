@@ -1,7 +1,6 @@
 package lojadebicicletas.v2.pkg0;
 
 import java.io.Serializable;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 public class waitingClientObj implements Serializable{
@@ -29,6 +28,10 @@ public class waitingClientObj implements Serializable{
 
     public void insertCategory(String category) {
         categorias.add(category);
+    }
+    
+    public void adeusCategory(String category) {
+        categorias.remove(category);
     }
 
     @Override

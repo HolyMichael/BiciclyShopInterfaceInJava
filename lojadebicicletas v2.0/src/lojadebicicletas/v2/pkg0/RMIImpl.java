@@ -7,7 +7,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -16,12 +15,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class RMIImpl extends UnicastRemoteObject implements RMIServerInterface{
-    int count;
     ArrayList<ClientObj> clients = new ArrayList<>();
+    ArrayList<OfflineObj> offlineList = new ArrayList<>();
     ArrayList<waitingClientObj> waitingList = new ArrayList<>();
-    ObjectInputStream oisClinetes, oisWaitingClienetes;
-    ObjectOutputStream oosClinetes, oosWaitingClienetes;
-    private static RMIClientInterface client;
+    ObjectInputStream oisClinetes, oisWaitingClienetes, oisOffClients;
+    ObjectOutputStream oosClinetes, oosWaitingClienetes, oosOffClients;
     static ArrayList<RMIClientInterface> cpi = new ArrayList<>();
     
     public RMIImpl(String name) throws RemoteException{
@@ -31,14 +29,30 @@ public class RMIImpl extends UnicastRemoteObject implements RMIServerInterface{
             temp.mkdir();
             System.out.println("Created Saved Files.");
         }
-        File wow = new File("../../ServerSavedFiles/Clinetes.txt");
-        File ples = new File("../../ServerSavedFiles/WaitingClients.txt");
         try {
             oisClinetes = new ObjectInputStream(new FileInputStream("../../ServerSavedFiles/Clinetes.txt"));
-            oisWaitingClienetes = new ObjectInputStream(new FileInputStream("../../ServerSavedFiles/WaitingClients.txt"));
             System.out.println("loading Clients...");
             clients = (ArrayList<ClientObj>)oisClinetes.readObject();
+        } catch (FileNotFoundException ex) {
+            System.out.println(ex.getMessage());
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(RMIImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            oisWaitingClienetes = new ObjectInputStream(new FileInputStream("../../ServerSavedFiles/WaitingClients.txt"));
             waitingList = (ArrayList<waitingClientObj>)oisWaitingClienetes.readObject();
+        } catch (FileNotFoundException ex) {
+            System.out.println(ex.getMessage());
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(RMIImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            oisOffClients = new ObjectInputStream(new FileInputStream("../../ServerSavedFiles/OfflineClients.txt"));
+            offlineList = (ArrayList<OfflineObj>)oisOffClients.readObject();
         } catch (FileNotFoundException ex) {
             System.out.println(ex.getMessage());
         } catch (IOException ex) {
@@ -60,13 +74,30 @@ public class RMIImpl extends UnicastRemoteObject implements RMIServerInterface{
     public boolean registerClient(String IP, int port, RMIClientInterface CliInterface){ 
     //retorna true caso registe o cliente e false caso lhe dê log-in
         boolean flagExists = true;
-        
+        boolean flagRemoved = true;
         for(ClientObj c : clients){ //itera por todos os utilizadores encontrando o que invocou este método
             if(c.getIp().equals(IP+":"+port)){
                 flagExists = false; //cliente já existe
                 c.setIsOnline(true);
                 c.setCli(CliInterface);
                 System.out.println(IP + " logged in.");
+                while(flagRemoved){
+                    flagRemoved = false;
+                    for(OfflineObj o : offlineList){
+                        if(o.getIp().equals(c.getIp())){
+                            try {
+                                c.getCli().printOnClient("Alguém adicionou " + o.getCategoria());
+                            } 
+                            catch (RemoteException ex) {
+                                Logger.getLogger(RMIImpl.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                            offlineList.remove(o);
+                            saveOfflineClients();
+                            flagRemoved = true;
+                            break;
+                        }
+                    }
+                }
                 return false;
             }
         }
@@ -115,11 +146,14 @@ public class RMIImpl extends UnicastRemoteObject implements RMIServerInterface{
     }
     
     public ArrayList<String> getAllCategories(){
+        ArrayList<String> cat;
         ArrayList<String> Categories = new ArrayList<>();
-        for(ClientObj c : clients)
-            for(String s : c.categorias)
+        for(ClientObj c : clients){ 
+            cat = c.getCategory();
+            for(String s : cat)
                 if(!(Categories.contains(s)))
                     Categories.add(s);
+        }
         return Categories;
     }
     
@@ -132,19 +166,25 @@ public class RMIImpl extends UnicastRemoteObject implements RMIServerInterface{
                     System.out.println(ip + " " + category);
                     for(waitingClientObj d: waitingList){ //iterate over waitingList to see if any client wants this category
                         System.out.println("teste5");
-                        if(d.getCategory().equals(category)){ //if yes
+                        if(d.getCategory().contains(category)){ //if yes
                             System.out.println("teste4");
                             for(ClientObj f: clients){ 
                                 System.out.println("teste3");
+                                System.out.println(d.getIp() + f.getIp());
                                 if(d.getIp().equals(f.getIp())){ //find it on client list
                                     System.out.println("teste2");
                                     if(f.isOnline)
                                         try {
-                                            System.out.println("teste1");
-                                            f.getCli().printOnClient("Mano alguém adicionou" + category);
+                                            f.getCli().printOnClient("Alguém adicionou " + category);
+                                            d.adeusCategory(category);
                                         } catch (RemoteException ex) {
-                                            Logger.getLogger(RMIImpl.class.getName()).log(Level.SEVERE, null, ex);
+                                            System.out.println("Erro no logout do cliente");
+                                            f.setIsOnline(false);
                                         }
+                                    if(!f.isOnline){
+                                        offlineList.add(new OfflineObj(f.getIp(),category));
+                                        saveOfflineClients();
+                                    }
                                 }
                             }
                         }
@@ -159,44 +199,32 @@ public class RMIImpl extends UnicastRemoteObject implements RMIServerInterface{
         return false;
     }
     
-    public ArrayList<String> getClientsSellingCategory(String category, String IP){
+    public ArrayList<String> getClientsSellingCategory(String category, int port, String IP){
         ArrayList<String> sellingClients = new ArrayList<>();
         Boolean FLAG = false;
         for(ClientObj c: clients){
-            System.out.println("aqui3");
             if(c.getCategory().contains(category)){
-                sellingClients.add(c.getIp());
+                sellingClients.add(c.getIp()+":"+port);
             }
         }
         if (sellingClients.size()==0){
             for(waitingClientObj d: waitingList){
-                System.out.println("aqui2");
-                FLAG=true;
-                if(d.getIp().equals(IP)){
+                if(d.getIp().equals(IP+":"+port)){
+                    FLAG=true;
                     if(!d.getCategory().contains(category)){
-                        waitingList.add(new waitingClientObj(IP));
+                        d.insertCategory(category);
                     }
                 }
             }
             if(!FLAG){
-                System.out.println("aqui1");
-                waitingList.add(new waitingClientObj(IP,category));
-                saveWaitingClients();
+                waitingList.add(new waitingClientObj(IP+":"+port,category));
             }
         }
         saveWaitingClients();
-        System.out.println("aqui");
         if(sellingClients.isEmpty()){
-            System.out.println("tamos caaa");
                 return null;
         }
-        System.out.println("tamosca");
         return sellingClients;
-    }
-    
-    
-    public int getCount(){
-        return count;
     }
     
     private void saveClients() {
@@ -226,6 +254,20 @@ public class RMIImpl extends UnicastRemoteObject implements RMIServerInterface{
         } catch (IOException ex) {
             Logger.getLogger(RMIImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }    
+    }  
+    
+    private void saveOfflineClients() {
+        try {
+            ObjectOutputStream oosOffClient = new ObjectOutputStream(new FileOutputStream("../../ServerSavedFiles/OfflineClients.txt"));
+            System.out.println("saving offline Clients...");
+            oosOffClient.writeObject(offlineList);
+            oosOffClient.flush();
+            System.out.println("Saved");
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(RMIImpl.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(RMIImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }  
 }
 

@@ -27,7 +27,7 @@ public class Cliente extends java.rmi.server.UnicastRemoteObject implements RMIC
     static int port;
     static InetAddress host; // IP do Cliente
     static RMIServerInterface serverObject;
-    static ArrayList<String> list = new ArrayList<>();
+    transient static ArrayList<String> list = new ArrayList<>();
     static String Nome = "catalogo";
     static String serverIP = "192.168.43.246";
     static int serverPort = 2043;
@@ -137,7 +137,7 @@ public class Cliente extends java.rmi.server.UnicastRemoteObject implements RMIC
         comunic.start();
         synchronized (comunic){
             do{
-                System.out.println("1 - Registar produto, 2 - Comprar produto, 3 - Seus Produtos à venda, 4 - Lista de categorias à venda, 5 - Retirar categoria do seu Perfil, 6 - Cancelar registo no Servidor, 7 - Comunicar com outro Cliente, 8 - exit");
+                System.out.println("1 - Registar produto, 2 - Comprar produto, 3 - Lista de categorias à venda, 4 - Retirar categoria do seu Perfil, 5 - Cancelar registo no Servidor, 6 - Comunicar com outro Cliente, 7 - exit");
                 i = Ler.umInt();
                 int counter = 1;
                 switch(i){
@@ -174,7 +174,7 @@ public class Cliente extends java.rmi.server.UnicastRemoteObject implements RMIC
                         System.out.println("Escreva a sua categoria:");
                         String op = Ler.umaString();
                         try {
-                            ArrayList <String> cat = serverObject.getClientsSellingCategory(op,ip);
+                            ArrayList <String> cat = serverObject.getClientsSellingCategory(op, port, ip);
                             if(cat == null){
                                 System.out.println("Categoria não encontrada foi adicionada à lista de memes");
                             }
@@ -189,16 +189,7 @@ public class Cliente extends java.rmi.server.UnicastRemoteObject implements RMIC
                             Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
                         }
                         break;
-                    case 3:
-                        int j;
-                        System.out.println("Produtos que tem à venda:");
-                        for(j=0;j<produtos.size();j++)
-                            System.out.println((j+1) + " - " + produtos.get(j));
-                        System.out.println("Categorias que disponibiliza:");
-                        for(j=0;j<categorias.size();j++)
-                            System.out.println((j+1) + " - " + categorias.get(j));
-                        break;
-                    case 7:
+                    case 6:
                         String Lere;
                         int auxport;
                         Socket Cliente = null;
@@ -236,7 +227,7 @@ public class Cliente extends java.rmi.server.UnicastRemoteObject implements RMIC
                             System.out.println(ex.getMessage());
                         }
                         break;
-                    case 4:
+                    case 3:
                         try {
                             int countings=1;
                             ArrayList<String> Categories = new ArrayList<>();
@@ -250,7 +241,7 @@ public class Cliente extends java.rmi.server.UnicastRemoteObject implements RMIC
                             Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
                         }
                         break;
-                    case 5:
+                    case 4:
                         System.out.println("Escolha a categoria a retirar");
                         String cate = Ler.umaString();
                         try {
@@ -263,7 +254,7 @@ public class Cliente extends java.rmi.server.UnicastRemoteObject implements RMIC
                             Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
                         }
                         break;
-                    case 6:
+                    case 5:
                         try {
                             if(serverObject.removeClient(ip, port)){ //logout from server
                                 System.out.println("Cliente removido com sucesso");
@@ -274,7 +265,7 @@ public class Cliente extends java.rmi.server.UnicastRemoteObject implements RMIC
                             Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
                         }
                 }
-            }while (i!=8);
+            }while (i!=7);
         }
         //produtos.add(new Produto("x91topbiek", APIExtension.categoria.Bicicletas.name(), 10)); //must test if not repeated
         //System.out.println(produtos.get(0).nome);
